@@ -1,0 +1,35 @@
+/* Your app custom files in this file */
+/* Tab bar icons */
+i.tabbar-demo-icon-1 {
+  width: 30px;
+  height: 30px;
+  background-image: url("../img/inactive-guitardroid.png" );
+}
+.active i.tabbar-demo-icon-1 {
+  background-image: url("../img/guitardroid.png" );
+}
+i.tabbar-demo-icon-2 {
+  width: 25px;
+  height: 25px;
+  background-image: url("../img/bullets-inactive.png" );
+}
+.active i.tabbar-demo-icon-2 {
+  background-image: url("../img/bullets.png" );
+}
+i.tabbar-demo-icon-3 {
+  width: 20px;
+  height: 25px;
+  background-image: url("../img/chart-inactive.png" );
+}
+.active i.tabbar-demo-icon-3 {  width: 20px;
+  height: 25px;
+ background-image: url("../img/chart.png" );padding-top:2px;
+}
+i.tabbar-demo-icon-4 {
+  width: 25px;
+  height: 30px;
+  background-image: url("../img/inactive-more.png");
+}
+.active i.tabbar-demo-icon-4 {
+  background-image: url("../img/more.png");
+}

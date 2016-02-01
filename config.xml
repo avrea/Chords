@@ -1,14 +1,14 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget 
-id="com.rjfun.admobdemo" 
+id="com.avrea.opm" 
 version="1.0.20141225" 
 xmlns="http://www.w3.org/ns/widgets"
 xmlns:gap="http://phonegap.com/ns/1.0"
 >
-    <name>JumpRope</name>
+    <name>OPM Songhits</name>
     
-    <description>DemoApp for AdMob</description>
-    <author email="rjfun.mobile@gmail.com" href="http://rjfun.github.io/">RjFun</author>
+    <description>Lyrics and chords of our well-loved OPM songs.</description>
+    <author email="buryavrea@gmail.com" href="http://composhare.com">Howard Monares</author>
     <content src="index.html" />
     <access origin="*" />
 
@@ -18,8 +18,8 @@ xmlns:gap="http://phonegap.com/ns/1.0"
 
     <!-- Customize your app and platform with the preference element. -->
     <preference name="orientation"                value="portrait" />        <!-- all: default means both landscape and portrait are enabled -->
-    <preference name="target-device"              value="handset" />      <!-- all: possible values handset, tablet, or universal -->
-    <preference name="fullscreen"                 value="false" />           <!-- all: hides the status bar at the top of the screen -->
+    <preference name="target-device"              value="universal" />      <!-- all: possible values handset, tablet, or universal -->
+    <preference name="fullscreen"                 value="true" />           <!-- all: hides the status bar at the top of the screen -->
     <preference name="webviewbounce"              value="false" />           <!-- ios: control whether the screen 'bounces' when scrolled beyond the top -->
     <preference name="prerendered-icon"           value="true" />           <!-- ios: if icon is prerendered, iOS will not apply it's gloss to the app's icon on the user's home screen -->
     <preference name="stay-in-webview"            value="false" />          <!-- ios: external links should open in the default browser, 'true' would use the webview the app lives in -->

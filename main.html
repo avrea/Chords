@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, minimal-ui">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+	<meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
+	<title>OPM Songhits</title>
+	<script type="text/javascript" src="cordova.js"></script>
+	<style type="text/css">div#fullpage {display:none;}</style>
+	
+	<link rel="stylesheet" href="css/framework7.min.css">
+    <link rel="stylesheet" href="css/my-app.css">
+	<script type='application/javascript' src='js/fastclick.js'></script>
+	<!-- Location: right panel Function: toggle links -->
+	<script src="js/toggle-jquery.js"></script>
+	<script src="js/toggle-function.js"></script>
+	<!-- Location: Chord chart Function: display chord jtab -->
+	<link type="text/css" rel="stylesheet" href="css/jtab.css"/>
+	<script src="js/jquery.js" type="text/javascript"></script>
+	<script src="js/raphael.js" type="text/javascript"></script>
+	<script src="js/jtab.js" type="text/javascript"></script>
+</head>
+<body onload="onLoad()" onresize="onResize()">
+<script>
+    function onLoad() {
+        if(( /(ipad|iphone|ipod|android|windows phone)/i.test(navigator.userAgent) )) {
+            document.addEventListener('deviceready', initApp, false);
+        } else {
+            initApp();
+        }
+    }
+
+    var admobid = {};
+    if( /(android)/i.test(navigator.userAgent) ) {
+		admobid = {
+			banner: 'ca-app-pub-6869992474017983/9375997553',
+			interstitial: 'ca-app-pub-6869992474017983/1657046752'
+		};
+    } else if(/(ipod|iphone|ipad)/i.test(navigator.userAgent)) {
+		admobid = {
+			banner: 'ca-app-pub-6869992474017983/4806197152',
+			interstitial: 'ca-app-pub-6869992474017983/7563979554'
+		};
+    } else {
+		admobid = {
+			banner: 'ca-app-pub-6869992474017983/8878394753',
+			interstitial: 'ca-app-pub-6869992474017983/1355127956'
+		};
+    }
+        
+    function initApp() {
+	if (! AdMob ) { alert( 'admob plugin not ready' ); return; }
+	initAd();
+        // display a banner at startup
+        createSelectedBanner();
+    }
+    function initAd(){
+        var defaultOptions = {
+            // bannerId: admobid.banner,
+            // interstitialId: admobid.interstitial,
+            // adSize: 'SMART_BANNER',
+            // width: integer, // valid when set adSize 'CUSTOM'
+            // height: integer, // valid when set adSize 'CUSTOM'
+            position: AdMob.AD_POSITION.BOTTOM_CENTER,
+            // offsetTopBar: false, // avoid overlapped by status bar, for iOS7+
+            bgColor: 'black', // color name, or '#RRGGBB'
+            // x: integer,		// valid when set position to 0 / POS_XY
+            // y: integer,		// valid when set position to 0 / POS_XY
+            isTesting: true, // set to true, to receiving test ad for testing purpose
+            // autoShow: true // auto show interstitial ad when loaded, set to false if prepare/show
+        };
+        AdMob.setOptions( defaultOptions );
+        registerAdEvents();
+    }
+    // optional, in case respond to events or handle error
+    function registerAdEvents() {
+        // new events, with variable to differentiate: adNetwork, adType, adEvent
+        document.addEventListener('onAdFailLoad', function(data){});
+        document.addEventListener('onAdLoaded', function(data){});
+        document.addEventListener('onAdPresent', function(data){});
+        document.addEventListener('onAdLeaveApp', function(data){});
+        document.addEventListener('onAdDismiss', function(data){});
+    }
+    
+    // click button to call following functions
+    function getSelectedAdSize() {
+        var i = document.getElementById("adSize").selectedIndex;
+        var items = document.getElementById("adSize").options;
+        return items[i].value;
+    }
+    function getSelectedPosition() {
+        var i = document.getElementById("adPosition").selectedIndex;
+        var items = document.getElementById("adPosition").options;
+        return parseInt( items[i].value );
+    }
+    function createSelectedBanner() {
+    	var overlap = document.getElementById('overlap').checked;
+        var offsetTopBar = document.getElementById('offsetTopBar').checked;
+        AdMob.createBanner( {adId:admobid.banner, overlap:overlap, offsetTopBar:offsetTopBar, adSize: getSelectedAdSize(), position:getSelectedPosition()} );
+    }
+    function createBannerOfGivenSize() {
+        var w = document.getElementById('w').value;
+        var h = document.getElementById('h').value;
+        
+        AdMob.createBanner( {adId:admobid.banner,
+                           adSize:'CUSTOM', width:w, height:h,
+                           position:getSelectedPosition()} );
+    }
+    function showBannerAtSelectedPosition() {
+        AdMob.showBanner( getSelectedPosition() );
+    }
+    function showBannerAtGivenXY() {
+        var x = document.getElementById('x').value;
+        var y = document.getElementById('y').value;
+        AdMob.showBannerAtXY(x, y);
+    }
+    function prepareInterstitial() {
+        var autoshow = document.getElementById('autoshow').checked;
+        AdMob.prepareInterstitial({adId:admobid.interstitial, autoShow:autoshow});
+    }
+    function onResize(){
+        var s = document.getElementById('sizeinfo');
+        s.innerHTML = "web view: " + window.innerWidth + " x " + window.innerHeight;
+    }
+</script>
+	<div id="fullpage">
+		<p>Demo for AdMob Plugin</p>
+		Banner<br /> Standard: <select id="adSize">
+			<option value='SMART_BANNER'>SMART_BANNER</option>
+			<option value='BANNER'>BANNER</option>
+			<option value='MEDIUM_RECTANGLE'>MEDIUM_RECTANGLE</option>
+			<option value='FULL_BANNER'>FULL_BANNER</option>
+			<option value='LEADERBOARD'>LEADERBOARD</option>
+			<option value='SKYSCRAPER'>SKYSCRAPER</option>
+		</select><br /> <input type='checkbox' id='overlap' />overlap<br/>
+         <input type='checkbox' id='offsetTopBar' />offsetTopBar<br/>
+		<button onclick="createSelectedBanner();">create</button>
+		<br /> Custom Size: (<input id='w' type='text' size=3 /> x <input
+			id='h' type='text' size=3>)
+		<button onclick="createBannerOfGivenSize();">create</button>
+		<br />
+
+		<button onclick="AdMob.removeBanner();">remove banner</button>
+
+		<hr />
+		<select id="adPosition">
+			<option value='1'>Top Left</option>
+			<option value='2'>Top Center</option>
+			<option value='3'>Top Right</option>
+			<option value='4'>Left</option>
+			<option value='5'>Center</option>
+			<option value='6'>Right</option>
+			<option value='7'>Bottom Left</option>
+			<option value='8' selected>Bottom Center</option>
+			<option value='9'>Bottom Right</option>
+		</select>
+		<button onclick="showBannerAtSelectedPosition();">show</button>
+		<br /> (<input id='x' type='text' size=3 />,<input id='y'
+			type='text' size=3>)
+		<button onclick="showBannerAtGivenXY();">show At XY</button>
+		<br />
+
+		<button onclick="AdMob.hideBanner();">hide banner</button>
+		<hr />
+
+		<p>Interstitial</p>
+		<input type='checkbox' id='autoshow' checked />auto show when ready<br />
+		<button onclick="prepareInterstitial();">Prepare</button>
+		<button onclick="AdMob.showInterstitial();">Show</button>
+		<div id='sizeinfo'></div>
+	</div>
+	
+	
+	
+	
+	    <div class="statusbar-overlay"></div><!-- Status bar overlay for fullscreen mode-->
+    <div class="panel-overlay"></div><!-- Panels overlay-->
+    <div class="panel panel-left panel-reveal"><!-- Left panel with reveal effect-->
+    <div class="content-block"><p>Left panel</p></div>
+    </div>
+	
+   <div class="panel panel-right panel-cover"> <!-- Right panel with cover effect-->
+    <div class="content-block">
+	<p>
+		<div class="toggle">
+		<a href="#" title="More Songs" class="toggle-trigger">Want more songs?</a>
+		<div class="toggle-content"><p>We add new songs every week. Please update your app to download the latest songs.<BR><BR><a href="" class="redlink">UPDATE NOW</a></p></div></div><HR>
+		
+		<div class="toggle">
+		<a href="#" title="Request song" class="toggle-trigger">Request song</a>
+		<div class="toggle-content"><p>Do you have a favorite OPM song? Comment it in https://play.google.com/store/apps/details?id=net.blulemons.opmjams and we will include it in our app.<BR><BR><a href="" class="redlink">REQUEST NOW</a></p></div></div><HR>
+				
+		<div class="toggle">
+		<a href="#" title="Rate Us" class="toggle-trigger">Rate Us</a>
+		<div class="toggle-content"><p>If you find our app useful, please rate us to continue our work. Thank you.<BR><BR><a href="" class="redlink">RATE NOW</a></p></div></div><HR>
+			
+		<div class="toggle">
+		<a href="#" title="Credits" class="toggle-trigger">Credits</a>
+		<div class="toggle-content"><p>Graphics: <B>Heizel Monares</B><BR>Monster icon:<B> Knicky Nicky</B><BR><BR>
+		Want to be a featured in our app? Post your chords in our facebook page and we will include it on Volume 2.<BR><BR>
+		www.facebook.com/opmlyrics
+		</p></div></div><HR>
+
+		<div class="toggle">
+		<a href="#" title="More Apps" class="toggle-trigger">More Apps</a>
+		<div class="toggle-content"><p>Who would love to hear original compositions from ordinary people?<BR><BR>Visit <B>www.composhare.com</B> to listen or to share your well-loved composition.<BR><BR><a href="http://composhare.com" class="redlink">VISIT NOW</a></p></div></div>
+
+	</p></div></div>
+	<div class="views tabs toolbar-through"> <!-- Views, and they are tabs--><!-- We need to set "toolbar-through" class on it to keep space for our tab bar-->
+    <div id="view-1" class="view view-main tab active"><!-- Your first view, it is also a .tab and should have "active" class to make it visible by default-->
+    <div class="pages"><!-- Pages-->
+    <div data-page="index-1" class="page"><!-- Page, data-page contains page name-->
+    <div class="page-content"  style="background:#000;"><!-- Scrollable page content-->
+	<div class="content-block">
+	<CENTER><a href="#view-2"  class="tab-link">
+	<H2>OPM SONGHITS</H2>
+	<IMG SRC="img/bands.jpg" class="appcover lazy-loaded lazy-fadeIn" style="opacity:0.5;"></a>
+	</CENTER>
+	</div> </div></div></div></div>
+	<div id="view-2" class="view tab"><!-- Second view (for second wrap)-->
+    <!-- We can make with view with navigation, let's add Top Navbar-->
+    <div class="navbar"><div class="navbar-inner"><div class="center sliding">OPM SONGHITS</div></div></div>
+    <div class="pages navbar-through"><div data-page="index-2" class="page"><div class="page-content gray"><div class="songlist"><ul>
+<!--------------------------------------------------------------------------------------------------------------
+											LIST OF SONGS
+--------------------------------------------------------------------------------------------------------------->
+<!----------------------------------------- A ------------------------------------------->	
+<li><span class="alphabet">A</span></li><HR>
+<!--start-->
+<li><a href="abotkamay.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Abot Kamay<span class="artist">
+Orange and Lemons</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="akalamo.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Akala Mo<span class="artist">
+Aiza Seguerra</span></div></div></div></a></li><HR>
+<!--end-->		
+<!--start-->
+<li><a href="akalamolang.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Akala Mo Lang<span class="artist">
+Zelle</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="akap.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Akap<span class="artist">
+Imago</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="akinkanalang-edited.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Akin Ka Na Lang<span class="artist">
+Itchyworms</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="akoybabalik.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Ako'y Babalik<span class="artist">
+Callalily</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="akonalang.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Ako Na Lang<span class="artist">
+Zia Quizon</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="alaala.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Alaala<span class="artist">
+Yeng Constantino</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="alapaap.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Alapaap<span class="artist">
+Eraserheads</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="alipin.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Alipin<span class="artist">
+Shamrock</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="alumnihomecoming-edited.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Alumni Homecoming<span class="artist">
+Parokya ni Edgar</span></div></div></div></a></li><HR>
+<!--end-->		
+<!--start-->
+<li><a href="ambisyoso.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Ambisyoso<span class="artist">
+Kamikazee</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="anak.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Anak<span class="artist">
+Freddie Aguilar</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="angakingawitin.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Ang Aking Awitin<span class="artist">
+Side A</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="anghel.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Anghel<span class="artist">
+Stonefree</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="antukin.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Antukin<span class="artist">
+Rico Blanco</span></div></div></div></a></li><HR>
+<!--end-->			
+<!--start-->
+<li><a href="asyoubelieve.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+As You Believe<span class="artist">
+Zelle</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="awitngbarkada.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Awit Ng Barkada<span class="artist">
+Itchyworms</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="ayokongtumanda.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Ayokong Tumanda<span class="artist">
+Itchyworms</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="ayoslang.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Ayos Lang<span class="artist">
+Siakol</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="ayt.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Ayt!<span class="artist">
+Spongecola</span></div></div></div></a></li><HR>
+<!--end-->	
+<!----------------------------------------- B ------------------------------------------->
+<li><span class="alphabet">B</span></li><HR>	
+<!--start-->
+<li><a href="bakit.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Bakit<span class="artist">
+Aegis</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="bakitgloc9.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Bakit<span class="artist">
+Gloc 9</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="bakitangbabae.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Bakit Ang Babae<span class="artist">
+Sandwich</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="bakitba.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Bakit Ba<span class="artist">
+Siakol</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="balisong.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Balisong<span class="artist">
+Rivermaya</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="batangbatakapa.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Batang Bata Ka PA<span class="artist">
+Sugarfree</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="bihag.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Bihag<span class="artist">
+Imago</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="bitiw.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Bitiw<span class="artist">
+Spongecola</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="basangbasasaulan.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Basang Basa sa Ulan<span class="artist">
+Aegis</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="basted.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Basted<span class="artist">
+Siakol</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="beer.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Beer<span class="artist">
+Itchyworms</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="betamax.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Betamax<span class="artist">
+Sandwich</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="bluesky.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Blue Sky<span class="artist">
+Hale</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="boykulot.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Boy Kulot<span class="artist">
+Rocksteddy</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="breaknatayo.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Break Na Tayo<span class="artist">
+Rocksteddy</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="bulong.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Bulong<span class="artist">
+Kitchie Nadal</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="buloy.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Buloy<span class="artist">
+Parokya ni Edgar</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="bumalikkanasaakin.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Bumalik Ka Na Sa Akin<span class="artist">
+Silent Sanctuary</span></div></div></div></a></li><HR>
+ <!--end-->	
+ <!--start-->
+<li><a href="byebyena.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Bye Bye Na<span class="artist">
+Rivermaya</span></div></div></div></a></li><HR>
+<!--end-->	
+<!----------------------------------------- C ------------------------------------------->	
+<li><span class="alphabet">C</span></li><HR>
+<!--start-->
+<li><a href="carinobrutal.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Cariño Brutal<span class="artist">
+Slapshock</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="chikinini.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Chikinini<span class="artist">
+Parokya ni Edgar</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="chiksilog.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Chiksilog<span class="artist">
+Kamikazee</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="chinito.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Chinito<span class="artist">
+Yeng Constantino</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="constantly.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Constantly<span class="artist">
+MYMP</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="cooloff.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Cool Off<span class="artist">
+Yeng Constantino</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="crazyforyou.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Crazy For You<span class="artist">
+Spongecola</span></div></div></div></a></li><HR>
+<!--end-->
+<!----------------------------------------- D ------------------------------------------->
+<li><span class="alphabet">D</span></li><HR>
+<!--start-->
+<li><a href="dearlonely.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Dear Lonely<span class="artist">
+Zia Quizon</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="dinaakoaasapa.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Di Na Ako Aasa Pa<span class="artist">
+Introvoys</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="dinaganun.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Di Na Ganun<span class="artist">
+Yeng Constantino</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="dinamababawi.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Di Na Mababawi<span class="artist">
+Spongecola</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="direction.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Direction<span class="artist">
+Slapshock</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="directorscut.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Director's Cut<span class="artist">
+Kamikazee</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="diwata-edited.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Diwata<span class="artist">
+Parokya ni Edgar feat. Abra</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="donttouchmybirdie.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Don't Touch My Birdie<span class="artist">
+Parokya ni Edgar</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="dukha.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Dukha<span class="artist">
+Aegis</span></div></div></div></a></li><HR>
+<!--end-->	
+<!----------------------------------------- E ------------------------------------------->	
+<li><span class="alphabet">E</span></li><HR>
+<!--start-->
+<li><a href="elise.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Elise<span class="artist">
+Rivermaya</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="especiallyforyou.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Especially For You<span class="artist">
+MYMP</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="ewan.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Ewan<span class="artist">
+Imago</span></div></div></div></a></li><HR>
+<!--end-->		
+<!----------------------------------------- F ------------------------------------------->	
+<li><span class="alphabet">F</span></li><HR>
+<!--start-->
+<li><a href="forallofmylife.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+For All of My Life<span class="artist">
+MYMP</span></div></div></div></a></li><HR>
+<!--end-->		
+<!----------------------------------------- G ------------------------------------------->	
+<li><span class="alphabet">G</span></li><HR>
+<!--start-->
+<li><a href="gabay.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Gabay<span class="artist">
+Siakol</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="gawinglangitangmundo.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Gawing Langit Ang Mundo<span class="artist">
+Siakol</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="girlbemine.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Girl Be Mine<span class="artist">
+Francis Magalona</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="gisingna.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Gising Na<span class="artist">
+Rocksteddy</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="gitara.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Gitara<span class="artist">
+Parokya ni Edgar</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="guillotine.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Guillotine<span class="artist">
+Urbandub</span></div></div></div></a></li><HR>
+<!--end-->	
+<!----------------------------------------- H ------------------------------------------->
+<li><span class="alphabet">H</span></li><HR>	
+<!--start-->
+<li><a href="habanganglahat.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Habang Ang Lahat<span class="artist">
+Siakol</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="habangatinanggabi.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Habang Atin Ang Gabi<span class="artist">
+South Border</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="halaga.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Halaga<span class="artist">
+Parokya ni Edgar</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="halik.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Halik<span class="artist">
+Aegis</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="hallelujah-edited.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Hallelujah<span class="artist">
+Bamboo</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="hanggatyakapka.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Hangga't Yakap Ka<span class="artist">
+Francis Magalona</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="hanggang.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Hanggang<span class="artist">
+Zsa Zsa Padilla</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="hanggangkailan.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Hanggang Kailan<span class="artist">
+Orange and Lemons</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="haplos.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Haplos<span class="artist">
+Shamrock</span></div></div></div></a></li><HR>
+ <!--end-->	
+ <!--start-->		
+ <li><a href="haringsablay.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Hari Ng Sablay<span class="artist">
+Sugarfree</span></div></div></div></a></li><HR>			
+<!--end-->
+<!--start-->
+<li><a href="harana.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Harana<span class="artist">
+Parokya ni Edgar</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="hawakkamay.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Hawak Kamay<span class="artist">
+Yeng Constantino</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="himala.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Himala<span class="artist">
+Kitchie Nadal</span></div></div></div></a></li><HR>
+ <!--end-->	
+<!--start-->
+<li><a href="hindimobaalam.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Hindi Mo Ba Alam<span class="artist">
+Siakol</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="heretonight.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Here Tonight<span class="artist">
+Hale</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="hesus.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Hesus<span class="artist">
+Aegis</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="hiling.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Hiling<span class="artist">
+Silent Sanctuary</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="hinahanaphanapkita.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Hinahanap-hanap Kita<span class="artist">
+Daniel Padilla</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="hinahanapngpuso.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Hinahanap Ng Puso<span class="artist">
+Gloc9</span></div></div></div></a></li><HR>
+ <!--end-->	
+<!--start-->
+<li><a href="holdon.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Holdon<span class="artist">
+Shamrock</span></div></div></div></a></li><HR>
+ <!--end-->	
+<!--start-->
+<li><a href="hulingelbimbo.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Huling El Bimbo<span class="artist">
+Eraserheads</span></div></div></div></a></li><HR>
+<!--end-->	
+ <!--start-->
+<li><a href="hulingsayaw.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Huling Sayaw<span class="artist">
+Kamikazee</span></div></div></div></a></li><HR>
+ <!--end-->	
+<!----------------------------------------- I ------------------------------------------->	
+<li><span class="alphabet">I</span></li><HR>
+<!--start-->
+<li><a href="ikaw.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Ikaw<span class="artist">
+Yeng Constantino</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="ikaw-lamang.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Ikaw Lamang<span class="artist">
+Siakol</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="ikawlamang.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Ikaw Lamang<span class="artist">
+Silent Sanctuary</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="ikawlang.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Ikaw Lang<span class="artist">
+Shamrock</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="ikawlangtalaga.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Ikaw Lang Talaga<span class="artist">
+Yeng Constantino</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="ikawnga.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Ikaw Nga<span class="artist">
+South Border</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="illbethere.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+I'll Be There<span class="artist">
+Julie Anne San Jose</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="imposible.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Imposible<span class="artist">
+Rocksteddy</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="inihaw.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Inihaw<span class="artist">
+Siakol</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="iniwanmoakongnagiisa.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Iniiwan Mo Akong Nag-iisa<span class="artist">
+Siakol</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="inumanna.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Inuman Na<span class="artist">
+Parokya ni Edgar</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="iyongiyongiyo.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Iyong Iyong Iyo<span class="artist">
+Spongecola</span></div></div></div></a></li><HR>
+<!--end-->
+<!----------------------------------------- J ------------------------------------------->	
+<li><span class="alphabet">J</span></li><HR>
+<!--start-->
+<li><a href="jeepney.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Jeepney<span class="artist">
+Spongecola</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="jeepneylovestory.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Jeepney Lovestory<span class="artist">
+Yeng Constantino</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="jopay.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Jopay<span class="artist">
+Mayonnaise</span></div></div></div></a></li><HR>
+<!--end-->		
+<!----------------------------------------- K ------------------------------------------->	
+<li><span class="alphabet">K</span></li><HR>
+<!--start-->
+<li><a href="kabilangmundo.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Kabilang Mundo<span class="artist">
+Siakol</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="kahitkailan.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Kahit Kailan<span class="artist">
+South Border</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="kahitmaputinaangbuhokko.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Kahit Maputi Na Ang Buhok Ko<span class="artist">
+Soapdish</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="kahitpa.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Kahit Pa<span class="artist">
+Hale</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="kailangankita.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Kailangan Kita<span class="artist">
+Spongecola</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="kaleidoscopeworld.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Kaleidoscope World<span class="artist">
+Francis Magalona</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="kanlungan.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Kanlungan<span class="artist">
+Noel Cabangon</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="kanto.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Kanto<span class="artist">
+Siakol</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="kaytagalkitanghinintay.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Kay Tagal Kitang Hinintay<span class="artist">
+Spongecola</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="kisapmata.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Kisapmata<span class="artist">
+Rivermaya</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="klsp.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+KLSP<span class="artist">
+Spongecola</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="krolithika.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Krolithika<span class="artist">
+Saydie</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="kumustaka.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Kumusta Ka<span class="artist">
+Freddie Aguilar</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="kundiman.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Kundiman<span class="artist">
+Silent Sanctuary</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="kungpwedelangsana.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Kung Pwede Lang Sana<span class="artist">
+Bugoy Drilon</span></div></div></div></a></li><HR>
+<!--end-->		
+<!--start-->
+<li><a href="kungwalaka.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Kung Wala Ka<span class="artist">
+Hale</span></div></div></div></a></li><HR>
+<!--end-->	
+<!----------------------------------------- L ------------------------------------------->	
+<li><span class="alphabet">L</span></li><HR>
+<!--start-->
+<li><a href="labsong.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Lab Song<span class="artist">
+Francis Magalona</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="lagimonalangakongdinededma.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Lagi Mo Na Lang Akong Dinidedma<span class="artist">
+Rocksteddy</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="lakastama.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Lakas Tama<span class="artist">
+Siakol</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="langit.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Langit<span class="artist">
+Slapshock</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="lapit.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Lapit<span class="artist">
+Yeng Constantino</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="lastlook.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Last Look<span class="artist">
+Chicosci</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="ligaw.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Ligaw<span class="artist">
+Yeng Constantino</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="ligaya.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Ligaya<span class="artist">
+Eraserheads</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="lihim.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Lihim<span class="artist">
+Zelle</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="likeeskimo.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Like Eskimo<span class="artist">
+Slapshock</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="liwanagsadilim.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Liwanag Sa Dilim<span class="artist">
+Rivermaya</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="loveofmylife.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Love of My Life<span class="artist">
+South Border</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="luha.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Luha<span class="artist">
+Aegis</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="lunes.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Lunes<span class="artist">
+Spongecola</span></div></div></div></a></li><HR>	
+<!--end-->
+<!----------------------------------------- M ------------------------------------------->
+<li><span class="alphabet">M</span></li><HR>	
+<!--start-->
+<li><a href="magasin.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Magasin<span class="artist">
+Eraserheads</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->		
+ <li><a href="magbalik.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+ Magbalik<span class="artist">
+Callalily</span></div></div></div></a></li><HR>			
+<!--end-->
+<!--start-->						
+ <li><a href="magkabilangmundo.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+ Magkabilang Mundo<span class="artist">
+ Jireh Lim</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+   <li><a href="magpakailanman.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+ Magpakailanman<span class="artist">
+Rocksteddy</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->		
+ <li><a href="mahalkoomahalako.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+ Mahal Ko o Mahal Ako<span class="artist">
+KZ Tandingan</span></div></div></div></a></li><HR>			
+<!--end-->
+<!--start-->
+<li><a href="mahiwagangkamote.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Mahiwagang Kamote<span class="artist">
+Francis Magalona</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="makapilingka.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Makapiling Ka<span class="artist">
+Spongecola</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="makitakangmuli.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Makita Kang Muli<span class="artist">
+Sugarfree</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+  <li><a href="mgakababayan.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Mga Kababayan<span class="artist">
+Francis Magalona</span></div></div></div></a></li><HR>	
+<!--end-->
+<!--start-->
+  <li><a href="makulaynabuhay.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+ Makulay Na Buhay<span class="artist">
+Kitchie Nadal</span></div></div></div></a></li><HR>	
+<!--end-->
+<!--start-->
+  <li><a href="malingakala.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+ Maling Akala<span class="artist">
+Eraserheads</span></div></div></div></a></li><HR>	
+<!--end-->
+<!--start-->
+<li><a href="maniwalakasana.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Maniwala Ka Sana<span class="artist">
+Parokya Ni Edgar</span></div></div></div></a></li><HR>	
+<!--end-->
+<!--start-->
+<li><a href="masilungan.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Masilungan<span class="artist">
+Sandwich</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="movie.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Movie<span class="artist">
+Spongecola</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="martyrnyebera.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+ Martyr Nyebera<span class="artist">
+Kamikazee</span></div></div></div></a></li><HR>	
+<!--end-->
+<!--start-->
+<li><a href="mahabapaanggabi.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+ Mahaba pa ang gabi<span class="artist">
+ Spongecola</span></div></div></div></a></li><HR>
+ <!--end-->
+<!--start-->
+  <li><a href="masaya.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+ Masaya<span class="artist">
+Bamboo</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+  <li><a href="maselangbahaghari.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+ Maselang Bahaghari<span class="artist">
+Eraserheads</span></div></div></div></a></li><HR>	
+<!--end-->
+<!--start-->	
+ <li><a href="mine.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+ Mine<span class="artist">
+Kim Chiu</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="minsan.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+ Minsan<span class="artist">
+Cueshe</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->	
+<li><a href="mrclay.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+ Mr.Clay<span class="artist">
+Bamboo</span></div></div></div></a></li><HR>	
+<!--start-->
+<li><a href="mrsuave.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Mr.Suave<span class="artist">
+Parokya ni Edgar</span></div></div></div></a></li><HR>
+ <!--end-->
+ <!--start-->		
+ <li><a href="mulasapuso.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Mula Sa Puso<span class="artist">
+Jovit Baldivino</span></div></div></div></a></li><HR>			
+<!--end-->
+<!--start-->
+<li><a href="muli.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Muli<span class="artist">
+Parokya ni Edgar</span></div></div></div></a></li><HR>
+<!--end-->
+<!----------------------------------------- N ------------------------------------------->	
+<li><span class="alphabet">N</span></li><HR>
+<!--start-->
+<li><a href="naaalalaka.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Naaalala Ka<span class="artist">
+Shamrock</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="nanditolangako.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Nandito Lang Ako<span class="artist">
+Shamrock</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="narda.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Narda<span class="artist">
+Kamikazee</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="ngayoynaririto.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Ngayo'y Naririto<span class="artist">
+Jay R</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="ngiti.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Ngiti<span class="artist">
+Ronnie Liang</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="nakapagtataka.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Nakapagtataka<span class="artist">
+Spongecola</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="nasaiyonaanglahat.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Nasa Iyo Na Ang Lahat<span class="artist">
+Daniel Padilla</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="nasaanka.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Nasaan Ka<span class="artist">
+Pupil</span></div></div></div></a></li><HR>
+<!--end-->		
+<!--start-->
+<li><a href="neon.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Neon<span class="artist">
+Spongecola</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="ngayonna.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Ngayon Na<span class="artist">
+Slapshock</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="nobela.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Nobela<span class="artist">
+Join The Club</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="noypi.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Noypi<span class="artist">
+Bamboo</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="numb.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Numb<span class="artist">
+Slapshock</span></div></div></div></a></li><HR>
+<!--end-->	
+<!----------------------------------------- O ------------------------------------------->	
+<li><span class="alphabet">O</span></li><HR>
+<!--start-->
+<li><a href="onlyremindsmeofyou.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Only Reminds Me of You<span class="artist">
+MYMP</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="overdrive.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Overdrive<span class="artist">
+Barbie Almalbis</span></div></div></div></a></li><HR>
+<!--end-->		
+<!----------------------------------------- P ------------------------------------------->	
+<li><span class="alphabet">P</span></li><HR>
+<!--start-->
+<li><a href="paano.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Paano<span class="artist">
+Freestyle</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="pag-ibig.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Pag-ibig<span class="artist">
+Spongecola</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="pagibig.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Pagibig<span class="artist">
+Yeng Constantino</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="paininmyheart.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Pain In My Heart<span class="artist">
+Zoo</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="panalangin.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Panalangin<span class="artist">
+Moonstar88</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="pangaraplang.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Pangarap Lang<span class="artist">
+Yeng Constantino</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="pansamantala.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Pansamantala<span class="artist">
+Callalily</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="parasayo.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Para Sayo<span class="artist">
+Parokya Ni Edgar</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="pareko.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Pare Ko<span class="artist">
+Eraserheads</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="pasan-edited.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Pasan<span class="artist">
+Callalily</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="pasubali-edited.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Pasubali<span class="artist">
+Spongecola</span></div></div></div></a></li><HR>	
+<!--end-->
+<!--start-->
+<li><a href="peksman.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Peksman<span class="artist">
+Siakol</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="pengenamanakonyan.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Penge Naman Ako N'yan<span class="artist">
+Itchyworms</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="pilit.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Pilit<span class="artist">
+Hilera</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="porque.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Porque<span class="artist">
+Maldita</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="probinsyana.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Probinsyana<span class="artist">
+Bamboo</span></div></div></div></a></li><HR>
+ <!--end-->
+<!--start-->
+<li><a href="puso.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Puso<span class="artist">
+Spongecola</span></div></div></div></a></li><HR>
+ <!--end-->
+<!----------------------------------------- Q ------------------------------------------->	
+<li><span class="alphabet">Q</span></li><HR>
+<!--start-->
+<li><a href="queenparanoia.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Queen Paranoia<span class="artist">
+Slapshock</span></div></div></div></a></li><HR>
+<!--end-->	
+<!----------------------------------------- R ------------------------------------------->	
+<li><span class="alphabet">R</span></li><HR>
+<!--start-->
+<li><a href="rainbow.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Rainbow<span class="artist">
+South Border</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="rebound.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Rebound<span class="artist">
+Silent Sanctuary</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="reckless.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Reckless<span class="artist">
+Save Me Hollywood</span></div></div></div></a></li><HR>
+<!--end-->		
+<!----------------------------------------- S ------------------------------------------->
+<li><span class="alphabet">S</span></li><HR>
+<!--start-->
+<li><a href="sabingitngisangpaalam.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Sa Bingit Ng Isang Paalam<span class="artist">
+Spongecola</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="sabihin.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Sabihin<span class="artist">
+Zelle</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="sabihinmona.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Sabihin Mo Na<span class="artist">
+Shamrock</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="salamat.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Salamat<span class="artist">
+Yeng Constantino</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="salapi.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Salapi<span class="artist">
+Itchyworms</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="sameground.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Same Ground<span class="artist">
+Kitchie Nadal</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="sanmanpatungo.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+San Man Patungo<span class="artist">
+Parokya Ni Edgar</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="sana.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Sana<span class="artist">
+Shamrock</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="sandalan.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Sandalan<span class="artist">
+6 Cycle Mind</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="sandalilang.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Sandali Lang<span class="artist">
+Silent Sanctuary</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="sandata.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Sandata<span class="artist">
+Yeng Constantino</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="sayo.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Sayo<span class="artist">
+Silent Sanctuary</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="sayosouthborder.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Sayo<span class="artist">
+South Border</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="sayang.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Sayang<span class="artist">
+Parokya Ni Edgar</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="sayangstonefree.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Sayang<span class="artist">
+Stonefree</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="sayangnasayang.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Sayang Na Sayang<span class="artist">
+Aegis</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="sige.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Sige<span class="artist">
+6 Cycle Mind</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="selos.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Selos<span class="artist">
+Sandwich</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="shootingstars.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Shooting Star<span class="artist">
+Hale</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="sigaw.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Sigaw<span class="artist">
+Slapshock</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="siguro.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Siguro<span class="artist">
+Yeng Constantino</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="simplengtuladmo.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Simpleng Tulad Mo<span class="artist">
+Daniel Padilla</span></div></div></div></a></li><HR>
+<!--end-->		
+<!--start-->
+<li><a href="sinta.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Sinta<span class="artist">
+Aegis</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="sirena.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Sirena<span class="artist">
+Gloc 9</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="sorryna.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Sorry Na<span class="artist">
+Parokya ni Edgar</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="soslow.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+So Slow<span class="artist">
+Freestyle</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="spolarium.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Spolarium<span class="artist">
+Eraserheads</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="stay.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Stay<span class="artist">
+Cueshe</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="sugod.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Sugod<span class="artist">
+Sandwich</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="sunburn.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Sunburn<span class="artist">
+Sandwich</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="sundo.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Sundo<span class="artist">
+Imago</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="suntoksabuwan.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Suntok Sa Buwan<span class="artist">
+Session Road</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="susundan.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Susundan<span class="artist">
+Callalily</span></div></div></div></a></li><HR>
+<!--end-->	
+<!----------------------------------------- T ------------------------------------------->	
+<li><span class="alphabet">T</span></li><HR>	
+<!--start-->
+<li><a href="tadhana.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Tadhana<span class="artist">
+Up Dharma Down</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="tambay.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Tambay<span class="artist">
+Spongecola</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="taralets.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Taralets<span class="artist">
+Imago</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="tatsulok.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Tatsulok<span class="artist">
+Bamboo</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="tellmewhereithurts.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Tell Me Where It Hurts<span class="artist">
+MYMP</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="tensionado.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Tensionado<span class="artist">
+Soapdish</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="thebostondrama.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+The Boston Drama<span class="artist">
+Typecast</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="thedayyousaidgoodnight.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+The Day You Said Goodnight<span class="artist">
+Hale</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="thistime.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+This Time<span class="artist">
+Freestyle</span></div></div></div></a></li><HR>
+<!--end-->		
+<!--start-->
+<li><a href="timein.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Time In<span class="artist">
+Yeng Constantino</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="torete.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Torete<span class="artist">
+Moonstar88</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="tropa.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Tropa<span class="artist">
+Siakol</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="tuliro.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Tuliro<span class="artist">
+Spongecola</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="tulogna.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Tulog Na<span class="artist">
+Sugarfree</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="tuloyparinako.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Tuloy Pa Rin Ako<span class="artist">
+Side A</span></div></div></div></a></li><HR>
+<!--end-->	
+<!----------------------------------------- U ------------------------------------------->	
+<li><span class="alphabet">U</span></li><HR>
+<!--start-->
+<li><a href="ulancueshe.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Ulan<span class="artist">
+Cueshe</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="ulan.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Ulan<span class="artist">
+Rivermaya</span></div></div></div></a></li><HR>
+<!--end-->		
+<!--start-->
+<li><a href="umaarawumuulan.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Umaaraw Umuulan<span class="artist">
+Rivermaya</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="una.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Una<span class="artist">
+Spongecola</span></div></div></div></a></li><HR>
+<!--end-->	
+<!----------------------------------------- V ------------------------------------------->	
+<li><span class="alphabet">V</span></li><HR>	
+<!--start-->
+<li><a href="vampiresocialclub.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Vampire Social Club<span class="artist">
+Chicosci</span></div></div></div></a></li><HR>
+<!--end-->		
+<!----------------------------------------- W ------------------------------------------->	
+<li><span class="alphabet">W</span></li><HR>	
+<!--start-->
+<li><a href="wagkanangumiyak.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Wag Ka Nang Umiyak<span class="artist">
+Sugarfree</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="wagmonasana.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Wag Mo Na Sana<span class="artist">
+Parokya ni Edgar</span></div></div></div></a></li><HR>
+<!--end-->		
+<!--start-->
+<li><a href="wagmongisipinyon.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Wag Mong Isipin Yon<span class="artist">
+Siakol</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="wagna.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Wag Na<span class="artist">
+Yeng Constantino</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="wagnawagmongsasabihin-edited.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Wag Na Wag Mong Sabihin<span class="artist">
+Kitchie Nadal</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="wakeup.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Wake Up<span class="artist">
+Slapshock</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="walangkadaladala.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Walang Kadala-dala<span class="artist">
+Sandwich</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="weareone.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+We Are One<span class="artist">
+Slapshock</span></div></div></div></a></li><HR>
+<!--end-->
+<!--start-->
+<li><a href="willyoueverlearn.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Will You Ever Learn<span class="artist">
+Typecast</span></div></div></div></a></li><HR>
+<!--end-->	
+<!----------------------------------------- X ------------------------------------------->		
+<!----------------------------------------- Y ------------------------------------------->		
+<li><span class="alphabet">Y</span></li><HR>	
+<!--start-->
+<li><a href="yakap.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Yakap<span class="artist">
+Siakol</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="yugto.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Yugto<span class="artist">
+Rico Blanco</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="youllbesafehere.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+You'll Be Safe Here<span class="artist">
+Rivermaya</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="yoursong.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Your Song<span class="artist">
+Parokya ni Edgar</span></div></div></div></a></li><HR>
+<!--end-->	
+<!--start-->
+<li><a href="youruniverse.html" class="item-link"> <div class="item-content"><div class="item-inner"><div class="item-title">
+Your Universe<span class="artist">
+Rico Blanco</span></div></div></div></a></li><HR>
+<!--end-->	
+<!----------------------------------------- Z ------------------------------------------->		
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+	</ul></div></div></div></div></div><div id="view-3" class="view tab"><div class="pages"><div data-page="index-3" class="page"><div class="page-content"><div class="content-block">
+    
+	<div class="container">
+  <ul class="tabs">
+    <li class="tab-link current" data-tab="tab-1">A</li>
+    <li class="tab-link" data-tab="tab-2">B</li>
+    <li class="tab-link" data-tab="tab-3">C</li>
+    <li class="tab-link" data-tab="tab-4">C#</li>
+    <li class="tab-link" data-tab="tab-5">D</li>
+	<li class="tab-link" data-tab="tab-6">E</li>
+	<li class="tab-link" data-tab="tab-7">F</li>
+	<li class="tab-link" data-tab="tab-8">F#</li>
+	<li class="tab-link" data-tab="tab-9">G</li>
+  </ul>
+	
+  <div id="tab-1" class="tab-content current"><span class="jtab">A Am</span><span class="jtab">A6 Am6</span><span class="jtab">A7 Am7</span><span class="jtab">Amaj7 Adim9</span><span class="jtab">A9 Am9</span><span class="jtab">Asus2 Asus4</span></div>
+  <div id="tab-2" class="tab-content"><span class="jtab">B Bm</span><span class="jtab">B6 Bm6</span><span class="jtab">B7 Bm7</span><span class="jtab">Bmaj7 Bdim9</span><span class="jtab">B9 Bm9</span><span class="jtab">Bsus2 Bsus4</span></div>
+  <div id="tab-3" class="tab-content"><span class="jtab">C Cm</span><span class="jtab">C6 Cm6</span><span class="jtab">C7 Cm7</span><span class="jtab">Cmaj7 Cdim9</span><span class="jtab">C9 Cm9</span><span class="jtab">Csus2 Csus4</span></div>
+  <div id="tab-4" class="tab-content"><span class="jtab">C# C#m</span><span class="jtab">C#6 C#m6</span><span class="jtab">C#7 C#m7</span><span class="jtab">C#maj7 C#dim9</span><span class="jtab">C#9 C#m9</span><span class="jtab">C#sus2 C#sus4</span></div>
+  <div id="tab-5" class="tab-content"><span class="jtab">D Dm</span><span class="jtab">D6 Dm6</span><span class="jtab">D7 Dm7</span><span class="jtab">Dmaj7 Ddim9</span><span class="jtab">D9 Dm9</span><span class="jtab">Dsus2 Dsus4</span></div>
+  <div id="tab-6" class="tab-content"><span class="jtab">E Em</span><span class="jtab">E6 Em6</span><span class="jtab">E7 Em7</span><span class="jtab">Emaj7 Edim9</span><span class="jtab">E9 Em9</span><span class="jtab">Esus2 Esus4</span></div>
+  <div id="tab-7" class="tab-content"><span class="jtab">F Fm</span><span class="jtab">F6 Fm6</span><span class="jtab">F7 Fm7</span><span class="jtab">Fmaj7 Fdim9</span><span class="jtab">F9 Fm9</span><span class="jtab">Fsus2 Fsus4</span></div>
+  <div id="tab-8" class="tab-content"><span class="jtab">F# F#m</span><span class="jtab">F#6 F#m6</span><span class="jtab">F#7 F#m7</span><span class="jtab">F#maj7 F#dim9</span><span class="jtab">F#9 F#m9</span><span class="jtab">F#sus2 F#sus4</span></div>
+  <div id="tab-9" class="tab-content"><span class="jtab">G Gm</span><span class="jtab">G6 Gm6</span><span class="jtab">G7 Gm7</span><span class="jtab">Gmaj7 Gdim9</span><span class="jtab">G9 Gm9</span><span class="jtab">Gsus2 Gsus4</span></div>
+
+  </div><!-- container -->
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	</div></div></div></div></div><div id="view-4" class="view tab"><div class="pages navbar-fixed"><div data-page="index-4" class="page"><div class="navbar"><div class="navbar-inner">
+    <div class="center">More</div></div></div><div class="page-content">
+	<div class="list-block"><!-- AVAILABLE SPACE TAKEN FROM "MORE" --> </div>
+	</div></div></div></div>
+    <div class="toolbar tabbar"><!-- Bottom Tabbar-->
+    <div class="toolbar-inner">
+		<a href="#view-3" class="tab-link"><i class="icon tabbar-demo-icon-3"></i>Chord chart</a>
+		<a href="#view-2" class="tab-link"><i class="icon tabbar-demo-icon-2"></i><span class="tabbar-label">Songs</span></a>
+		<a href="#" data-panel="right" class="open-panel tab-link"><i class="icon tabbar-demo-icon-4"></i>More</a>
+	</div>
+	</div>
+    </div>
+    <script type="text/javascript" src="js/framework7.min.js"></script>
+	<script type="text/javascript" src="js/my-app.js"></script>
+	<!-- Chord Chart Tab -->
+	<script type="text/javascript" src="js/tab.js"></script>
+<script src="cordova.js"></script>
+
+	
+	 <script type="text/javascript">
+	 window.addEventListener('load', function() {
+    new FastClick(document.body);
+}, false);
+</script>
+	
+	
+	
+	
+
+</body>
+</html>

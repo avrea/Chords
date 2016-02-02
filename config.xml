@@ -46,7 +46,7 @@ xmlns:gap="http://phonegap.com/ns/1.0"
     <icon src="res/icon/winphone/icon-48.png"  gap:platform="winphone" />
     <icon src="res/icon/winphone/icon-173.png" gap:platform="winphone"   gap:role="background" />
     
-	
+	<plugin name="org.apache.cordova.inappbrowser" spec="0.1.0" source="pgb" />
 	<gap:plugin name="org.apache.cordova.splashscreen" />
 	<preference name="SplashScreenDelay" value="10000" />
     <gap:splash src="res/screen/android/screen-ldpi-portrait.png"       gap:platform="android" gap:qualifier="port-ldpi" />

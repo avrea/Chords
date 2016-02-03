@@ -3293,6 +3293,7 @@ ul.tabs li.current{ width: 25px;
 .toggle a.active.toggle-trigger:before {content: url(../img/up.png);}
 .toggle .toggle-content {color:#757575;font-size:11px;}/* The content of the toggle */
 
+#hydra{background:#000;color:#fff;padding:10px;}
 
 .gray{background:#ECEFF1;display:block;}
 .white{background-color:#FFF;}
@@ -3326,3 +3327,4 @@ h2{z-index: 100;
 .abra {height: 120px;width:265px;background-position: -532px -910px;}
 .itchyworms {height: 133px;width:265px;background-position: -0px -598px;}
 .credits{display:none!important;}
+

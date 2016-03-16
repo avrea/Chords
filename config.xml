@@ -1,12 +1,12 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget 
-id="com.avrea.opm" 
-versionCode = "551" 
-version="2.1.1" 
+id="com.avrea.chords" 
+versionCode = "554" 
+version="3.1" 
 xmlns="http://www.w3.org/ns/widgets"
 xmlns:gap="http://phonegap.com/ns/1.0"
 >
-    <name>OPM Songhits</name>
+    <name>OPM Chords</name>
     
     <description>Lyrics and chords of our well-loved OPM songs.</description>
     <author email="buryavrea@gmail.com" href="http://composhare.com">Howard Monares</author>
